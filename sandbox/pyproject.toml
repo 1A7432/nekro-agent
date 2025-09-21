@@ -1,0 +1,35 @@
+[tool.poetry]
+name = "nekro-agent-sandbox"
+version = "0.2.0"
+description = "Nekro Agent AI 执行沙盒环境"
+authors = ["KroMiose <li_xiangff@163.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+matplotlib = "^3.9.1"
+opencv-python = "^4.10.0.84"
+numpy = "^1.26.4"
+scipy = "^1.14.0"
+scikit-learn = "^1.5.1"
+imageio = "^2.35.0"
+pytesseract = "^0.3.13"
+sympy = "^1.13.3"
+pymupdf = "1.23.8"
+rarfile = "^4.2"
+markdown = "^3.7"
+pandas = "^2.2.3"
+openpyxl = "^3.1.5"
+docx = "^0.2.4"
+python-pptx = "^1.0.2"
+mplfonts = "^0.0.8"
+networkx = "^3.4.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+# [[tool.poetry.source]]
+# name = "aliyun"
+# url = "https://mirrors.aliyun.com/pypi/simple/"
+# priority = "primary"

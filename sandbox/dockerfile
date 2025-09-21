@@ -1,0 +1,78 @@
+# 使用 Python 官方镜像作为基础镜像
+FROM python:3.10.13-slim-bullseye
+
+# 设置环境变量
+ENV DEBIAN_FRONTEND=noninteractive \
+    PYTHONUNBUFFERED=1 \
+    LANG=C.UTF-8 \
+    PIP_CACHE_DIR=/app/.pip_cache
+
+# 设置时区
+RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
+    echo 'Asia/Shanghai' > /etc/timezone
+
+# 系统更新与基础工具安装
+RUN apt update && apt install -y \
+    curl \
+    gnupg \
+    && apt clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# 安装 Node.js 20.x
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+    apt install -y nodejs && \
+    apt clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# 安装系统依赖
+RUN apt update && apt install -y \
+    # 编译工具
+    build-essential \
+    pkg-config \
+    swig \
+    # 系统库
+    tzdata \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    libffi-dev \
+    libssl-dev \
+    libmupdf-dev \
+    # 可视化工具
+    graphviz \
+    # OCR相关
+    tesseract-ocr \
+    tesseract-ocr-chi-sim \
+    && apt clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# 安装 Python 工具
+RUN pip install -U pip setuptools wheel && \
+    pip install -U mplfonts poetry==1.8.0 && \
+    mplfonts init
+
+# 创建应用目录并设置权限
+RUN mkdir -p /app /app/shared /app/packages /app/.pip_cache && \
+    chown -R nobody:nogroup /app && \
+    chmod -R 777 /app /app/shared /app/packages /app/.pip_cache && \
+    chmod 755 /bin/bash
+
+# 设置工作目录并复制文件
+WORKDIR /app
+COPY . /app
+
+# 安装项目依赖
+RUN poetry config virtualenvs.create false && \
+    poetry config installer.max-workers 4 && \
+    poetry install --no-interaction --no-ansi
+
+# 设置 pip.conf 配置
+RUN mkdir -p /etc/pip && \
+    echo "[global]" > /etc/pip/pip.conf && \
+    echo "cache-dir = /app/.pip_cache" >> /etc/pip/pip.conf && \
+    echo "no-cache-dir = false" >> /etc/pip/pip.conf && \
+    echo "timeout = 120" >> /etc/pip/pip.conf && \
+    echo "index-url = https://pypi.tuna.tsinghua.edu.cn/simple" >> /etc/pip/pip.conf && \
+    echo "trusted-host = pypi.tuna.tsinghua.edu.cn" >> /etc/pip/pip.conf && \
+    chmod 644 /etc/pip/pip.conf
+
+CMD ["bash"]
